@@ -2,6 +2,8 @@ import numpy as np
 import math
 import subprocess
 import collections
+from fractions import gcd
+
 
 
 def build_factorbase(prime_file,n):
@@ -57,13 +59,16 @@ def get_primes2(n):
 
 def prime_factors(s, factorbase):
     i = 0
+    vector_s_prime = []
     count_exp = {}
     temp = factorbase[len(factorbase)-1]
+
     while s > 1:
         temp = factorbase[i]
         count_exp[factorbase[i]] = 0
         while s % factorbase[i] == 0:
             count_exp[factorbase[i]] += 1
+            vector_s_prime.append(factorbase[i])
             if(factorbase[i]>s):
                 return 0
             else:
@@ -78,7 +83,37 @@ def prime_factors(s, factorbase):
 
     count_exp = collections.OrderedDict(sorted(count_exp.items()))
 
+
     return count_exp
+
+def prime_factors2(s, factorbase):
+    i = 0
+    vector_s_prime = []
+
+    temp = factorbase[len(factorbase)-1]
+
+    while s > 1:
+        temp = factorbase[i]
+
+        while s % factorbase[i] == 0:
+            vector_s_prime.append(factorbase[i])
+            if(factorbase[i]>s):
+                return 0
+            else:
+                s /= factorbase[i]
+
+
+        if (len(factorbase)-1) == i and s>1:
+            return 0
+
+        else:
+            i = i + 1
+
+
+
+    return vector_s_prime
+
+
 
 
 def generate_primes(N, factorbase):
@@ -104,10 +139,17 @@ def generate_primes(N, factorbase):
                 if(check_r == 0):
                     s=(r**2)%N
                     primes = prime_factors(s, factorbase)
+
                     vector_binary = ""
 
+
+
+                    vector_S = prime_factors2(s,factorbase)
                     if (primes != 0):
                         for key in primes:
+                          #  k = int(key
+                           # value=primes[key]
+                            #vector_S.append(k**value)
                             if(primes.get(key)%2==0):
                                 vector_binary= vector_binary + "0" + " "
                             else:
@@ -121,7 +163,7 @@ def generate_primes(N, factorbase):
                             vector_check.append(vector_binary)
                             text_file.write(vector_binary + "\n")
                             vector_R.append(r)
-                            vector_S.append(s)
+                            #vector_S.append(s)
 
                         else:
                             boolean = 0
@@ -132,48 +174,91 @@ def generate_primes(N, factorbase):
                                 text_file.write(vector_binary + "\n")
                                 vector_check.append(vector_binary)
                                 vector_R.append(r)
-                                vector_S.append(s)
+                               # vector_S.append(s)
                                 #vector_primes(primes)
 
 
                         if(len(vector_R)>=1010):
                             print len(vector_R)
                             text_file.close()
-                            return vector_R
+                            return vector_R, vector_S
 
     print len(vector_R)
     text_file.close()
-    return vector_R
+    return vector_R, vector_S
 
 
 
 def factors(x_vector):
-     count = 0;
-     for word in x_vector.read().split():
-         if (count == 0 and count ==1 ):
-             count +=1
-             pass
-         else:
-              print word
+    vector_rows= []
+    count = -1;
+    lines= []
+    vector_string = []
+    for n in range(0,4):
+        line = x_vector.readline().replace(" ","")
+        if n ==0:
+            pass
+        else:
+            for i in range(0, len(line)):
+                if line[i]=="1":
+                    vector_string.append(i)
+            vector_rows.append(vector_string)
+    return vector_rows
+
+
+def get_gcd(N,vector_string,vector_R,vector_s_prime):
+    combined_R=1
+    combined_S = 1
+    for index in vector_string:
+        combined_R=combined_R* vector_R[index]
+        for s in vector_s_prime:
+            combined_S = combined_S*s
+
+    final_R= combined_R%N
+    final_S=combined_S%N
+    final_gcd = final_S-final_R
+    print "GCD-trying \n"
+    factor= gcd(final_gcd,N)
+    return factor
+
+#def gcd(m, n):
+ #   print m,n
+  #  if(n==0):
+   #     return m
+    #return gcd(n,m%n)
 
 
 
 
 
 
-N= 16637
 
-prime_file = open("primtal.txt", "r")
-factorbase = build_factorbase(prime_file,1000)
-print len(factorbase)
-generate_primes(N,factorbase)
-subprocess.call(["g++", "gaussbin.cpp"])
-subprocess.call("./a.out matrix.txt output.txt")
-x_vector = open("output.txt")
-factors(x_vector)
+def main():
+    N= 16637
+
+    prime_file = open("primtal.txt", "r")
+    factorbase = build_factorbase(prime_file,1000)
+    #factorbase= [2,3,5,7,11,13,17,19,23,29]
+    print len(factorbase)
+    vector_R,vector_s_prime= generate_primes(N,factorbase)
+
+    subprocess.call(["g++", "gaussbin.cpp"])
+    subprocess.check_call(['./a.out', 'matrix.txt', 'output.txt'])
+    #subprocess.call("./a.out", "matrix.txt", "output.txt")
+    x_vector = open("output.txt","r")
+    vector_rows=factors(x_vector)
+
+    for colomn in vector_rows:
+        print "X-vector: "
+        factor1=get_gcd(N,colomn, vector_R,vector_s_prime)
+        if factor1!=1:
+            factor2=N/factor1
+            return factor1, factor2
+        else:
+            print "gcd = 1"
 
 
-
+main()
 
 
         #print tmp
