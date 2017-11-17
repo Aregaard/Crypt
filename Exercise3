@@ -122,14 +122,17 @@ def generate_primes(N, factorbase):
     vector_check = []
     n = 10000
     #vector_primes = []
+    prime_dicts=[]
     text_file = open("matrix.txt", "w")
     text_file.write(str(12)+" "+str(len(factorbase))+ "\n")
+    RR=[225,261,291,292,317,343,413,431,458,469,473,490]
     while len(vector_R) < 12:
 
-        for k in range(3, 12):
-            for j in range(2, 15):
+        for k in range(0, 1):
+            for j in range(0, 12):
 
-                r = round(math.sqrt(k * N) + j,0)
+                r = RR[j]
+                    #round(math.sqrt(k * N) + j,0)
 
                 check_r=0
                 if(len(vector_R)!=0):
@@ -143,6 +146,7 @@ def generate_primes(N, factorbase):
                     vector_binary = ""
                     if (primes != 0):
                         vector_S.append(prime_factors2(s, factorbase))
+                        prime_dicts.append(prime_factors(s,factorbase))
                         for key in primes:
 
                             if(primes.get(key)%2==0):
@@ -150,7 +154,7 @@ def generate_primes(N, factorbase):
                             else:
                                 vector_binary = vector_binary + "1" + " "
 
-                        while len(vector_binary)<=2*len(factorbase):
+                        while len(vector_binary)<2*len(factorbase):
                             vector_binary = vector_binary +"0" +" "
 
 
@@ -204,13 +208,14 @@ def factors(x_vector):
 def get_gcd(N,vector_string,vector_R,vector_s_prime):
     combined_R=1
     combined_S = 1
+    s_check=0
     for index in vector_string:
         combined_R=combined_R* vector_R[index]
         for s in vector_s_prime[index]:
             combined_S = combined_S*s
 
     final_R= combined_R % N
-    final_S=combined_S % N
+    final_S=math.sqrt(combined_S)% N
     final_gcd = final_S-final_R
 
     factor= gcd(final_gcd,N)
@@ -229,7 +234,7 @@ def get_gcd(N,vector_string,vector_R,vector_s_prime):
 
 
 def main():
-    N= 16637
+    N= 307561
 
     prime_file = open("primtal.txt", "r")
     #factorbase = build_factorbase(prime_file,1000)
@@ -244,11 +249,11 @@ def main():
     vector_rows=factors(x_vector)
 
     for colomn in vector_rows:
-        print "X-vector: "
+
         factor1=get_gcd(N,colomn, vector_R,vector_s_prime)
         if factor1!=1:
             factor2=N/factor1
-            return factor1, factor2
+            print factor1, factor2
         else:
             print "gcd = 1"
 
